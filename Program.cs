@@ -5,18 +5,19 @@
         static void Main()
         {
             List<Student> students = new List<Student>();
+            Logic ILogic = new Logic();
 
-            while (Logic.AddAnother) //initialise overall input loop
+            bool addAnother = true;
+
+            while (addAnother) //initialise overall input loop
             {
                 Student inStudent = new Student();
                 students.Add(inStudent);
+                addAnother = Logic.AddAnother;
             }
 
-            if (!Logic.AddAnother)
-            {
-                Logic.OutputAllStudents(students);
-                Logic.GetHighestGrade(students);
-            }
+            Logic.OutputAllStudents(students);
+            Logic.GetHighestGrade(students);
         }
             
     }
@@ -139,25 +140,25 @@ public class Student
 
 public class Logic
 {
-    public static bool AddAnother { get; set; }
+    public bool AddAnother { get; set; }
     public static void OutputAllStudents(List<Student> students)
     {
         foreach (var student in students)
         {
-            Console.WriteLine(student.Name + " has ");
+            Console.Write(student.Name + " has ");
 
-            if (student.HasPassed) Console.WriteLine("passed");
-            else Console.WriteLine("failed");
+            if (student.HasPassed) Console.Write("passed");
+            else Console.Write("failed");
 
             Console.WriteLine(" with a Grade " + student.Grade + "!");
         }
     }
     public static void GetHighestGrade(List<Student> students)
     {
-        var bestStudent = students.OrderByDescending(x => x.Grade, StringComparer.Ordinal);
-        foreach (var student in bestStudent)
+        var studentsByHighestGrade = students.OrderByDescending(x => x.Grade, StringComparer.Ordinal); //create new list sorted by highest grade
+        foreach (Student student in studentsByHighestGrade)
         {
-            Console.WriteLine(bestStudent);
+            Console.WriteLine(student.Grade);
         }
     }
 
