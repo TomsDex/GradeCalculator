@@ -4,20 +4,18 @@
     {
         static void Main()
         {
-            List<Student> students = new List<Student>();
-            Logic ILogic = new Logic();
+            List<Student> studentsInput = new List<Student>();
 
-            bool addAnother = true;
-
-            while (addAnother) //initialise overall input loop
+            do //initialise overall input loop
             {
                 Student inStudent = new Student();
-                students.Add(inStudent);
-                addAnother = Logic.AddAnother;
-            }
+                studentsInput.Add(inStudent);
+                if (!inStudent.AddAnother) break;
 
-            Logic.OutputAllStudents(students);
-            Logic.GetHighestGrade(students);
+            } while (true);
+
+            Logic.OutputAllStudents(studentsInput);
+            Logic.GetHighestGrade(studentsInput);
         }
             
     }
@@ -30,6 +28,7 @@ public class Student
         public bool IsHigher { get; set; }
     public string Grade { get; set; }
     public bool HasPassed { get; set; }
+    public bool AddAnother { get; set; }
 
 
     public Student()
@@ -39,9 +38,14 @@ public class Student
             IsHigher = GetBand();
         Grade = CalculateGrade(IsHigher, Mark);
         HasPassed = CalculatePassed(Grade);
+        AddAnother = CalculateAddAnother();
 
         }
 
+    /// <summary>
+    /// Gets user input for student name
+    /// </summary>
+    /// <returns>The name of the student as a string</returns>
         private static string GetName()
         {
             string? inName;
@@ -62,7 +66,11 @@ public class Student
             } //end of name loop
         }
 
-        private static double GetMark()
+    /// <summary>
+    /// Gets user input for student mark out of 100
+    /// </summary>
+    /// <returns>The mark of the student as a double</returns>
+    private static double GetMark()
         {
             double inMark;
 
@@ -75,8 +83,9 @@ public class Student
                     if (sGrade == string.Empty) throw new Exception("Grade input is empty! Please try again.");
                     else
                     {
-                        if (double.TryParse(sGrade, out inMark) && 0 <= inMark && inMark <= 100) return inMark; //parse input to double and perform input validatioon that 0 <= inMark <= 100
-                        else throw new Exception("Please enter a valid number between 0 and 100!");
+                        if (double.TryParse(sGrade, out inMark) && 0 <= inMark && inMark <= 100) return inMark; 
+                        //parse input to double and perform input validatioon that 0 <= inMark <= 100
+                        else throw new FormatException("Please enter a valid number between 0 and 100!");
                     }
                 }
                 catch (Exception ex)
@@ -86,6 +95,10 @@ public class Student
             } //end of grade loop
         }
 
+    /// <summary>
+    /// Gets user input for if the student is on the higher band
+    /// </summary>
+    /// <returns>True if the user inputs Y on the question, otherwise false if the user inputs N, otherwise reruns if user input is invalid</returns>
         private static bool GetBand()
         {
             while (true) //initialise higher grade storage loop
@@ -106,6 +119,12 @@ public class Student
             }//end of high/low loop
         }
 
+    /// <summary>
+    /// Calculates student grade from mark and band
+    /// </summary>
+    /// <param name="isHigher"></param>
+    /// <param name="mark"></param>
+    /// <returns>The grade (A*-U) as a string</returns>
     private static string CalculateGrade(bool isHigher, double mark)
     {
         if (isHigher)
@@ -130,43 +149,21 @@ public class Student
         }
     }
 
+    /// <summary>
+    /// Calculates if the user has passed based on their grade
+    /// </summary>
+    /// <param name="grade"></param>
+    /// <returns>True if the grade is A*, A, B or C, otherwise false</returns>
     private static bool CalculatePassed(string grade)
     {
         if (grade == "C" || grade == "B" || grade == "A" || grade == "A*") return true;
         else return false;
     }
 
-}
-
-public class Logic
-{
-    public bool AddAnother { get; set; }
-    public static void OutputAllStudents(List<Student> students)
-    {
-        foreach (var student in students)
-        {
-            Console.Write(student.Name + " has ");
-
-            if (student.HasPassed) Console.Write("passed");
-            else Console.Write("failed");
-
-            Console.WriteLine(" with a Grade " + student.Grade + "!");
-        }
-    }
-    public static void GetHighestGrade(List<Student> students)
-    {
-        var studentsByHighestGrade = students.OrderByDescending(x => x.Grade, StringComparer.Ordinal); //create new list sorted by highest grade
-        foreach (Student student in studentsByHighestGrade)
-        {
-            Console.WriteLine(student.Grade);
-        }
-    }
-
-    public Logic() 
-    {
-        AddAnother = CalculateAddAnother();
-    }
-
+    /// <summary>
+    /// Asks if the user wants to add another student
+    /// </summary>
+    /// <returns>True if the user inputs Y, false if the user inputs N, repeats if otherwise</returns>
     private static bool CalculateAddAnother()
     {
         Console.WriteLine("Would you like to add another student? [Y/N]");
@@ -184,5 +181,51 @@ public class Logic
                 Console.WriteLine(ex.Message.ToString());
             }
         }
+    }
+}
+
+public class Logic
+{
+    public static void OutputAllStudents(List<Student> students)
+    {
+        foreach (var student in students)
+        {
+            Console.Write(student.Name + " has ");
+
+            if (student.HasPassed) Console.Write("passed");
+            else Console.Write("failed");
+
+            Console.WriteLine(" with a Grade " + student.Grade + "!");
+        }
+    }
+    public static void GetHighestGrade(List<Student> studentsInput)
+    {
+        //sorts student list by highest grade. this list stores A above A*
+        List<Student> studentsByOrdinal = studentsInput.OrderBy(student => student.Grade, StringComparer.Ordinal).ToList();
+
+        //begin process to move A* above A
+
+        //initialise new list to store final result
+        List<Student> studentsByGrade = new List<Student>();
+
+        //for every student input
+        for (int i = 0; i < studentsByOrdinal.Count; i++)
+        {
+            var student = studentsByOrdinal[i];
+
+            if (student.Grade == "A*")
+            {
+                //add A* students to final list
+                studentsByGrade.Add(student);
+                //remove A* students from old list
+                studentsByOrdinal.Remove(student);
+            }
+        }
+
+        //add all other students to final list
+        foreach (var student in studentsByOrdinal) studentsByGrade.Add(student);
+
+        //output result
+        foreach (var student in studentsByGrade) Console.WriteLine(student.Grade);
     }
 }
