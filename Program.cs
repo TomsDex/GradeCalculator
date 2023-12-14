@@ -1,4 +1,4 @@
-﻿namespace TW_Deliverable_One___Refactored
+﻿namespace D1
 {
     internal class Program
     {
@@ -7,106 +7,82 @@
             List<Student> students = new List<Student>();
             LogicTemplate logic = new LogicTemplate();
 
-            bool addAnother = true;
-
-            while (addAnother) //initialise overall input loop
+            do //initialise overall input loop
             {
                 Student inStudent = new Student();
                 students.Add(inStudent);
-                addAnother = logic.AddAnother;
+                addAnother = Logic.AddAnother;
             }
 
-            LogicTemplate.OutputAllStudents(students);
-            LogicTemplate.GetHighestGrade(students);
+            Logic.OutputAllStudents(students);
+            Logic.GetHighestGrade(students);
         }
             
     }
 }
-
 public class Student
-{
-    public string Name { get; private set; }
-    public double Mark { get; private set; }
-    public bool IsHigher { get; private set; }
-    public string Grade { get; private set; }
-    public bool HasPassed { get; private set; }
+    {
+        public string Name { get; set; }
+        public double Mark { get; set; }
+        public bool IsHigher { get; set; }
+    public string Grade { get; set; }
+    public bool HasPassed { get; set; }
 
 
     public Student()
-    {
-        Name = GetName();
-        Mark = GetMark();
-        IsHigher = GetBand();
+        {
+            Name = GetName();
+            Mark = GetMark();
+            IsHigher = GetBand();
         Grade = CalculateGrade(IsHigher, Mark);
         HasPassed = CalculatePassed(Grade);
 
     }
 
-        private static string GetName()
-        {
-            string? inName;
+    /// <summary>
+    /// Gets user input for student name
+    /// </summary>
+    /// <returns>The name of the student</returns>
+    private static string GetName()
+    {
+        return InputValidation.GetNonEmptyStringInput("Enter a student's name:");
+    }
 
-            while (true) //initialise student name loop
-            {
-                Console.WriteLine("Enter a student's name:");
-                try
-                {
-                    inName = Console.ReadLine();
-                    if (inName == string.Empty) throw new Exception("Name input is empty! Please try again.");
-                    else return inName;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message.ToString());
-                }
-            } //end of name loop
-        }
+    /// <summary>
+/// Gets user input for student mark out of 100
+/// </summary>
+/// <returns>The mark of the student as a double</returns>
+    private static double GetMark()
+    {
+        return InputValidation.GetValidMarkInput("Enter the student's mark:");
+    }
+        
 
-        private static double GetMark()
-        {
-            double inMark;
+    /// <summary>
+    /// Gets user input for if the student is on the higher band
+    /// </summary>
+    /// <returns>True if the user inputs Y on the question, otherwise false if the user inputs N, otherwise reruns if user input is invalid</returns>
+    private static bool GetBand()
+    {
+        return InputValidation.GetYOrNInput("Is the student on the higher grade list? [Y/N]"); 
+    }
 
-            while (true) //initialise student grade loop
-            {
-                Console.WriteLine("Enter the student's mark: ");
-                try
-                {
-                    string? sGrade = Console.ReadLine();
-                    if (sGrade == string.Empty) throw new Exception("Grade input is empty! Please try again.");
-                    else
-                    {
-                        if (double.TryParse(sGrade, out inMark) && 0 <= inMark && inMark <= 100) return inMark; //parse input to double and perform input validatioon that 0 <= inMark <= 100
-                        else throw new Exception("Please enter a valid number between 0 and 100!");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message.ToString());
-                }
-            } //end of grade loop
-        }
+    /// <summary>
+    /// Gets user input for if the user would like to add another student
+    /// </summary>
+    /// <returns>True if the user inputs Y on the question, otherwise false if the user inputs N, otherwise reruns if user input is invalid</returns>
+    private static bool GetAddAnother()
+    {
+        return InputValidation.GetYOrNInput("Would you like to add another student? [Y/N]");
+    }
 
-        private static bool GetBand()
-        {
-            while (true) //initialise higher grade storage loop
-            {
-                Console.WriteLine("Is this student on the higher grade list? [Y/N]");
-                try
-                {
-                    string? input = Console.ReadLine()?.ToUpper();
-
-                    if (input == "Y") return true;
-                    else if (input == "N") return false;
-                    else throw new Exception("Please respond with Y or N");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message.ToString());
-                }
-            }//end of high/low loop
-        }
-
-    private static string CalculateGrade(bool isHigher, double mark)
+    /// <summary>
+    /// Calculates student grade from mark and band
+    /// </summary>
+    /// <param name="isHigher"></param>
+    /// <param name="mark"></param>
+    /// <returns>The grade (A*-U) as a string</returns>
+    internal static string CalculateGrade(bool isHigher, double mark)
     {
         if (isHigher)
         {
@@ -130,19 +106,27 @@ public class Student
         }
     }
 
+    /// <summary>
+    /// Calculates if the user has passed based on their grade
+    /// </summary>
+    /// <param name="grade"></param>
+    /// <returns>True if the grade is A*, A, B or C, otherwise false</returns>
     private static bool CalculatePassed(string grade)
     {
-        if (grade == "C" || grade == "B" || grade == "A" || grade == "A*") return true;
-        else return false;
+        return grade == "C" || grade == "B" || grade == "A" || grade == "A*";
     }
-
 }
+
 
 public class LogicTemplate
 {
-    public bool AddAnother { get; set; }
+    /// <summary>
+    /// Outputs all student details, including a pass/fail and their grade
+    /// </summary>
+    /// <param name="students"></param>
     public static void OutputAllStudents(List<Student> students)
     {
+        Console.WriteLine();
         foreach (var student in students)
         {
             Console.Write(student.Name + " has ");
@@ -152,37 +136,137 @@ public class LogicTemplate
 
             Console.WriteLine(" with a Grade " + student.Grade + "!");
         }
+        Console.WriteLine();
     }
-    public static void GetHighestGrade(List<Student> students)
+
+    /// <summary>
+    /// Sorts all students into a new list by grade, then outputs the students who achieved the highest grade
+    /// </summary>
+    /// <param name="studentsInput"></param>
+    public static void GetAndOutputHighestGrade(List<Student> students)
     {
-        var studentsByHighestGrade = students.OrderByDescending(x => x.Grade, StringComparer.Ordinal); //create new list sorted by highest grade
-        foreach (Student student in studentsByHighestGrade)
+        //sorts student list alphabetically, this list stores A above A*
+        List<Student> studentsByOrdinal = students.OrderBy(student => student.Grade, StringComparer.Ordinal).ToList();
+
+        //begin process to move A* above A
+
+        //initialise new list to store final result
+        List<Student> studentsByGrade = new List<Student>();
+
+        //for every student input
+        for (int i = 0; i < studentsByOrdinal.Count; i++)
         {
-            Console.WriteLine(student.Grade);
+            var student = studentsByOrdinal[i];
+
+            if (student.Grade == "A*")
+            {
+                //add A* students to final list
+                studentsByGrade.Add(student);
+                //remove A* students from old list
+                studentsByOrdinal.Remove(student);
+            }
+        }
+
+        //add all other students to final list
+        foreach (var student in studentsByOrdinal) studentsByGrade.Add(student);
+
+        //gets the highest grade
+        string highestGrade = studentsByGrade[0].Grade;
+
+        //initialise list for all students with that grade
+        List<Student> studentsWithHighestGrade = new List<Student>();
+
+        foreach (var student in studentsByGrade)
+        {
+            if (student.Grade == highestGrade)
+            {
+                //add all highest grade students to highest grade list
+                studentsWithHighestGrade.Add(student);
+            }
+        }
+
+        Console.Write("There ");
+        if (studentsWithHighestGrade.Count == 1) Console.Write("is ");
+        else Console.Write("are ");
+        Console.Write(studentsWithHighestGrade.Count + " student");
+        if (studentsWithHighestGrade.Count != 1) Console.Write("s");
+        Console.Write(" with the highest grade of a");
+        if (highestGrade == "E" || highestGrade == "A" || highestGrade == "A*") Console.Write("n");
+        Console.WriteLine(" " + highestGrade + "!");
+        if (studentsWithHighestGrade.Count == 1) Console.WriteLine("This was achieved by " + studentsWithHighestGrade[0].Name + ".");
+        else
+        {
+            Console.WriteLine("This was achieved by the following students:");
+            foreach (var student in studentsWithHighestGrade)
+            {
+                if (student.Grade == highestGrade)
+                {
+                    Console.WriteLine(student.Name);
+                }
+            }
         }
     }
 
-    public LogicTemplate() 
+    public Logic() 
     {
         AddAnother = CalculateAddAnother();
     }
 
-    private static bool CalculateAddAnother()
+/// <summary>
+/// Contains the whole program's input validation
+/// </summary>
+public static class InputValidation
+{
+    /// <summary>
+    /// Ensures a string is not empty or null
+    /// </summary>
+    /// <param name="prompt"></param>
+    /// <returns>A user input</returns>
+    public static string GetNonEmptyStringInput(string prompt)
     {
-        Console.WriteLine("Would you like to add another student? [Y/N]");
         while (true)
         {
-            try
-            {
-                string? input = Console.ReadLine()?.ToUpper();
-                if (input == "Y") return true;
-                else if (input == "N") return false;
-                else throw new Exception("Please respond with Y or N");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message.ToString());
-            }
+            //Output user propmpt to enter name
+            Console.WriteLine(prompt);
+            string? userInput = Console.ReadLine();
+
+            //if input is not null/empty return input
+            if (!string.IsNullOrEmpty(userInput)) return userInput;
+            //otherwise reprompt
+            Console.WriteLine("Input is empty! Please try again.");
+        }
+    }
+
+    /// <summary>
+    /// Ensures an entered mark is valid
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns>A number between 0 and 100</returns>
+    public static double GetValidMarkInput(string prompt)
+    {
+        while(true)
+        {
+            //gets user input of mark as string and performs validation
+            string userInput = GetNonEmptyStringInput(prompt);
+
+            //parses user input to double, checks if valid range and returns valid input
+            if (double.TryParse(userInput, out double mark) && (mark >= 0 && mark <= 100)) return mark;
+            //otherwise reprompt
+            Console.WriteLine("Please enter a valid input between 0 and 100!");
+        }
+    }
+
+    public static bool GetYOrNInput(string prompt)
+    {
+        while (true)
+        {
+            //gets user input as string and performs validation
+            string userInput = GetNonEmptyStringInput(prompt).ToUpper();
+
+            //converts y/n to bool
+            if (userInput == "Y") return true;
+            else if (userInput == "N") return false;
+            else Console.WriteLine("Please enter a Y or N!");
         }
     }
 }
