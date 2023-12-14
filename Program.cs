@@ -5,7 +5,7 @@
         static void Main()
         {
             List<Student> students = new List<Student>();
-            Logic ILogic = new Logic();
+            LogicTemplate logic = new LogicTemplate();
 
             bool addAnother = true;
 
@@ -13,34 +13,34 @@
             {
                 Student inStudent = new Student();
                 students.Add(inStudent);
-                addAnother = Logic.AddAnother;
+                addAnother = logic.AddAnother;
             }
 
-            Logic.OutputAllStudents(students);
-            Logic.GetHighestGrade(students);
+            LogicTemplate.OutputAllStudents(students);
+            LogicTemplate.GetHighestGrade(students);
         }
             
     }
 }
 
 public class Student
-    {
-        public string Name { get; set; }
-        public double Mark { get; set; }
-        public bool IsHigher { get; set; }
-    public string Grade { get; set; }
-    public bool HasPassed { get; set; }
+{
+    public string Name { get; private set; }
+    public double Mark { get; private set; }
+    public bool IsHigher { get; private set; }
+    public string Grade { get; private set; }
+    public bool HasPassed { get; private set; }
 
 
     public Student()
-        {
-            Name = GetName();
-            Mark = GetMark();
-            IsHigher = GetBand();
+    {
+        Name = GetName();
+        Mark = GetMark();
+        IsHigher = GetBand();
         Grade = CalculateGrade(IsHigher, Mark);
         HasPassed = CalculatePassed(Grade);
 
-        }
+    }
 
         private static string GetName()
         {
@@ -138,7 +138,7 @@ public class Student
 
 }
 
-public class Logic
+public class LogicTemplate
 {
     public bool AddAnother { get; set; }
     public static void OutputAllStudents(List<Student> students)
@@ -162,7 +162,7 @@ public class Logic
         }
     }
 
-    public Logic() 
+    public LogicTemplate() 
     {
         AddAnother = CalculateAddAnother();
     }
