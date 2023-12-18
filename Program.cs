@@ -4,36 +4,40 @@
     {
         static void Main()
         {
-            List<Student> students = new List<Student>();
-            LogicTemplate logic = new LogicTemplate();
+            List<Student> studentsInput = new();
 
             do //initialise overall input loop
             {
-                Student inStudent = new Student();
-                students.Add(inStudent);
-                addAnother = Logic.AddAnother;
-            }
+                Student inStudent = new();
+                studentsInput.Add(inStudent);
+                if (!inStudent.AddAnother) break;
 
-            Logic.OutputAllStudents(students);
-            Logic.GetHighestGrade(students);
+
+            } while (true);
+
+            Logic.OutputAllStudents(studentsInput);
+            Logic.GetAndOutputHighestGrade(studentsInput);
+            Logic.OutputAverageMark(studentsInput);
         }
-            
+
     }
 }
 public class Student
-    {
-        public string Name { get; set; }
-        public double Mark { get; set; }
-        public bool IsHigher { get; set; }
+{
+    public string Name { get; set; }
+    public double Mark { get; set; }
+    public bool IsHigher { get; set; }
+    public bool AddAnother { get; set; }
     public string Grade { get; set; }
     public bool HasPassed { get; set; }
 
 
     public Student()
-        {
-            Name = GetName();
-            Mark = GetMark();
-            IsHigher = GetBand();
+    {
+        Name = GetName();
+        Mark = GetMark();
+        IsHigher = GetBand();
+        AddAnother = GetAddAnother();
         Grade = CalculateGrade(IsHigher, Mark);
         HasPassed = CalculatePassed(Grade);
 
@@ -49,14 +53,14 @@ public class Student
     }
 
     /// <summary>
-/// Gets user input for student mark out of 100
-/// </summary>
-/// <returns>The mark of the student as a double</returns>
+    /// Gets user input for student mark out of 100
+    /// </summary>
+    /// <returns>The mark of the student as a double</returns>
     private static double GetMark()
     {
         return InputValidation.GetValidMarkInput("Enter the student's mark:");
     }
-        
+
 
     /// <summary>
     /// Gets user input for if the student is on the higher band
@@ -64,7 +68,7 @@ public class Student
     /// <returns>True if the user inputs Y on the question, otherwise false if the user inputs N, otherwise reruns if user input is invalid</returns>
     private static bool GetBand()
     {
-        return InputValidation.GetYOrNInput("Is the student on the higher grade list? [Y/N]"); 
+        return InputValidation.GetYOrNInput("Is the student on the higher grade list? [Y/N]");
     }
 
     /// <summary>
@@ -87,22 +91,21 @@ public class Student
         if (isHigher)
         {
             if (mark < 10) return "U";
-            else if (mark < 30) return "F";
-            else if (mark < 50) return "E";
-            else if (mark < 60) return "D";
-            else if (mark < 70) return "C";
-            else if (mark < 80) return "B";
-            else if (mark < 90) return "A";
-            else return "A*";
+            if (mark < 30) return "F";
+            if (mark < 50) return "E";
+            if (mark < 60) return "D";
+            if (mark < 70) return "C";
+            if (mark < 80) return "B";
+            if (mark < 90) return "A";
+            return "A*";
         }
-        else
         {
             if (mark < 20) return "U";
-            else if (mark < 40) return "F";
-            else if (mark < 60) return "E";
-            else if (mark < 80) return "D";
-            else if (mark < 90) return "C";
-            else return "B";
+            if (mark < 40) return "F";
+            if (mark < 60) return "E";
+            if (mark < 80) return "D";
+            if (mark < 90) return "C";
+            return "B";
         }
     }
 
@@ -118,7 +121,7 @@ public class Student
 }
 
 
-public class LogicTemplate
+public class Logic
 {
     /// <summary>
     /// Outputs all student details, including a pass/fail and their grade
@@ -151,7 +154,7 @@ public class LogicTemplate
         //begin process to move A* above A
 
         //initialise new list to store final result
-        List<Student> studentsByGrade = new List<Student>();
+        List<Student> studentsByGrade = new();
 
         //for every student input
         for (int i = 0; i < studentsByOrdinal.Count; i++)
@@ -174,7 +177,7 @@ public class LogicTemplate
         string highestGrade = studentsByGrade[0].Grade;
 
         //initialise list for all students with that grade
-        List<Student> studentsWithHighestGrade = new List<Student>();
+        List<Student> studentsWithHighestGrade = new();
 
         foreach (var student in studentsByGrade)
         {
@@ -207,10 +210,26 @@ public class LogicTemplate
         }
     }
 
-    public Logic() 
+    public static void OutputAverageMark(List<Student> students)
     {
-        AddAnother = CalculateAddAnother();
+        double avgMark = 0;
+
+        //gets sum of marks
+        foreach (var student in students) avgMark += student.Mark;
+
+        //divides by number of student inputs to get average mark
+        avgMark /= students.Count;
+
+        //rounds to the nearest int
+        avgMark = double.Round(avgMark);
+
+        if (students.Count > 1)
+        {
+            Console.WriteLine("The average mark achieved by all students was " + avgMark + ".");
+            Console.WriteLine("This is equivalent to a Grade " + Student.CalculateGrade(true, avgMark) + " at the higher band and a Grade " + Student.CalculateGrade(false, avgMark) + " at the lower band.");
+        }
     }
+}
 
 /// <summary>
 /// Contains the whole program's input validation
@@ -244,7 +263,7 @@ public static class InputValidation
     /// <returns>A number between 0 and 100</returns>
     public static double GetValidMarkInput(string prompt)
     {
-        while(true)
+        while (true)
         {
             //gets user input of mark as string and performs validation
             string userInput = GetNonEmptyStringInput(prompt);
