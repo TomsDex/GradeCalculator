@@ -284,8 +284,8 @@ public static class InputValidation
 
             //converts y/n to bool
             if (userInput == "Y") return true;
-            else if (userInput == "N") return false;
-            else Console.WriteLine("Please enter a Y or N!");
+            if (userInput == "N") return false;
+            Console.WriteLine("Please enter a Y or N!");
         }
     }
 }
